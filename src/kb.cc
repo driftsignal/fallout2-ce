@@ -1,5 +1,6 @@
 #include "kb.h"
 
+#include <map>
 #include <string.h>
 
 #include "input.h"
@@ -19,6 +20,7 @@ typedef struct LogicalKeyEntry {
 
 typedef struct KeyboardEvent {
     int scanCode;
+    int keySym;
     unsigned short modifiers;
 } KeyboardEvent;
 
@@ -70,6 +72,7 @@ static KeyboardEvent gKeyboardEventsQueue[64];
 //
 // 0x6ACC30
 static LogicalKeyEntry gLogicalKeyEntries[SDL_NUM_SCANCODES];
+  static std::map<int, LogicalKeyEntry> gLogicalSymEntries;
 
 // A state of physical keys [SDL_SCANCODE_*] currently pressed.
 //
@@ -213,6 +216,7 @@ void _kb_simulate_key(KeyboardData* data)
             VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
             vcrEntry->type = VCR_ENTRY_TYPE_KEYBOARD_EVENT;
             vcrEntry->keyboardEvent.key = data->key & 0xFFFF;
+            vcrEntry->keyboardEvent.sym = data->sym & 0xFFFF;
             vcrEntry->time = _vcr_time;
             vcrEntry->counter = _vcr_counter;
 
@@ -242,6 +246,7 @@ void _kb_simulate_key(KeyboardData* data)
 
     if (keyState != KEY_STATE_UP) {
         gLastKeyboardEvent.scanCode = physicalKey;
+        gLastKeyboardEvent.keySym = data->sym;
         gLastKeyboardEvent.modifiers = 0;
 
         if (physicalKey == SDL_SCANCODE_CAPSLOCK) {
@@ -462,7 +467,15 @@ static int keyboardDequeueLogicalKeyCode()
 
     int logicalKey = -1;
 
-    LogicalKeyEntry* logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+
+    LogicalKeyEntry* logicalKeyDescription;
+
+    if (gKeyboardLayout  != 0) {
+      logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+    } else {
+      logicalKeyDescription = &(gLogicalSymEntries[keyboardEvent->keySym]);
+    }
+    
     if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_ANY_CONTROL) != 0) {
         logicalKey = logicalKeyDescription->ctrl;
     } else if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_RIGHT_ALT) != 0) {
@@ -1279,6 +1292,12 @@ static void keyboardBuildQwertyConfiguration()
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].lmenu = -1;
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].rmenu = KEY_ALT_DELETE;
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].ctrl = KEY_CTRL_DELETE;
+
+    LogicalKeyEntry sc;
+    for (k = 0; k < SDL_NUM_SCANCODES; k++) {
+      sc = gLogicalKeyEntries[k];
+      gLogicalSymEntries[sc.unmodified] = sc;
+    }
 }
 
 // 0x4D0400

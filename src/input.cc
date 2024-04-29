@@ -1092,6 +1092,7 @@ void _GNW95_process_message()
         case SDL_KEYUP:
             if (!keyboardIsDisabled()) {
                 keyboardData.key = e.key.keysym.scancode;
+                keyboardData.sym = e.key.keysym.sym;
                 keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
                 _GNW95_process_key(&keyboardData);
             }

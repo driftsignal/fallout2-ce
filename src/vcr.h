@@ -57,6 +57,7 @@ typedef struct VcrEntry {
         } initial;
         struct {
             short key;
+            short sym;
         } keyboardEvent;
         struct {
             int dx;
