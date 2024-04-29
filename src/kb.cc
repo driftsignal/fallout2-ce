@@ -466,7 +466,13 @@ static int keyboardDequeueLogicalKeyCode()
     }
 
     int logicalKey = -1;
-    LogicalKeyEntry* logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+    LogicalKeyEntry* logicalKeyDescription;
+
+    if (gKeyboardLayout  != 0) {
+      logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+    } else {
+      logicalKeyDescription = &(gLogicalSymEntries[keyboardEvent->keySym]);
+    }
 
     if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_ANY_CONTROL) != 0) {
         logicalKey = logicalKeyDescription->ctrl;
