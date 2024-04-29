@@ -264,6 +264,7 @@ int vcrUpdate()
                     if (1) {
                         KeyboardData keyboardData;
                         keyboardData.key = _vcr_buffer[_vcr_buffer_index].keyboardEvent.key;
+                        keyboardData.sym = _vcr_buffer[_vcr_buffer_index].keyboardEvent.sym;
                         _kb_simulate_key(&keyboardData);
                     }
                     break;

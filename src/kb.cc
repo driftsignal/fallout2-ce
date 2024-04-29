@@ -19,6 +19,7 @@ typedef struct LogicalKeyEntry {
 
 typedef struct KeyboardEvent {
     int scanCode;
+    int keySym;
     unsigned short modifiers;
 } KeyboardEvent;
 
@@ -213,6 +214,7 @@ void _kb_simulate_key(KeyboardData* data)
             VcrEntry* vcrEntry = &(_vcr_buffer[_vcr_buffer_index]);
             vcrEntry->type = VCR_ENTRY_TYPE_KEYBOARD_EVENT;
             vcrEntry->keyboardEvent.key = data->key & 0xFFFF;
+            vcrEntry->keyboardEvent.sym = data->sym & 0xFFFF;
             vcrEntry->time = _vcr_time;
             vcrEntry->counter = _vcr_counter;
 
@@ -461,8 +463,8 @@ static int keyboardDequeueLogicalKeyCode()
     }
 
     int logicalKey = -1;
-
     LogicalKeyEntry* logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
+
     if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_ANY_CONTROL) != 0) {
         logicalKey = logicalKeyDescription->ctrl;
     } else if ((keyboardEvent->modifiers & KEYBOARD_EVENT_MODIFIER_RIGHT_ALT) != 0) {
@@ -1279,6 +1281,12 @@ static void keyboardBuildQwertyConfiguration()
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].lmenu = -1;
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].rmenu = KEY_ALT_DELETE;
     gLogicalKeyEntries[SDL_SCANCODE_KP_DECIMAL].ctrl = KEY_CTRL_DELETE;
+
+    LogicalKeyEntry sc;
+    for (k = 0; k < SDL_NUM_SCANCODES; k++) {
+      sc = gLogicalKeyEntries[k];
+      gLogicalSymEntries[sc.unmodified] = sc;
+    }
 }
 
 // 0x4D0400
