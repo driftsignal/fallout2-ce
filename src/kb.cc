@@ -1,5 +1,6 @@
 #include "kb.h"
 
+#include <map>
 #include <string.h>
 
 #include "input.h"
@@ -71,6 +72,7 @@ static KeyboardEvent gKeyboardEventsQueue[64];
 //
 // 0x6ACC30
 static LogicalKeyEntry gLogicalKeyEntries[SDL_NUM_SCANCODES];
+static std::map<int, LogicalKeyEntry> gLogicalSymEntries;
 
 // A state of physical keys [SDL_SCANCODE_*] currently pressed.
 //
@@ -244,6 +246,7 @@ void _kb_simulate_key(KeyboardData* data)
 
     if (keyState != KEY_STATE_UP) {
         gLastKeyboardEvent.scanCode = physicalKey;
+        gLastKeyboardEvent.keySym = data->sym;
         gLastKeyboardEvent.modifiers = 0;
 
         if (physicalKey == SDL_SCANCODE_CAPSLOCK) {
