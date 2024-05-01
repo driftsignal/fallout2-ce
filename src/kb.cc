@@ -466,9 +466,11 @@ static int keyboardDequeueLogicalKeyCode()
     }
 
     int logicalKey = -1;
+    int sym = keyboardEvent->keySym;
     LogicalKeyEntry* logicalKeyDescription;
 
-    if (gKeyboardLayout  != 0) {
+    if (gKeyboardLayout  != 0 ||
+        (sym < 0 || sym > 128)) {
       logicalKeyDescription = &(gLogicalKeyEntries[keyboardEvent->scanCode]);
     } else {
       logicalKeyDescription = &(gLogicalSymEntries[keyboardEvent->keySym]);
